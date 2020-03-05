@@ -1,6 +1,7 @@
 //const http = require('http');
 const express=require('express');
 const bodyParser=require('body-parser');
+const mongoose=require('mongoose');
 const path=require('path');
 const app = express();
 app.set('view engine', 'ejs');
@@ -9,7 +10,6 @@ app.set('view engine', 'ejs');
 const adminRoutes=require('./routes/admin');//
 const shopRoutes = require('./routes/shop');
 const errorController=require('./controllers/error');
-const mongoConnect = require('./util/database').mongoConnect;
 const User = require('./models/user');
 //between creating app and creatig server we can add middlewares
 
@@ -55,9 +55,14 @@ app.use(errorController.get404);
 
 server.listen(3000);*/
 
-mongoConnect(()=> {
+/*mongoConnect(()=> {
     //console.log(client);
     app.listen(3000);
-});
+});*/
+
+mongoose.connect(process.env.MONGODB_URI)
+.then(result=> {
+    app.listen(3000);
+}).catch(err=> console.log(err));
 
 

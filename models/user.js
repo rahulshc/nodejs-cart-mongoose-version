@@ -1,4 +1,4 @@
-const mongodb = require('mongodb');
+/*const mongodb = require('mongodb');
 const getDb = require('../util/database').getDb;
 
 const ObjectId = mongodb.ObjectId;
@@ -125,4 +125,4 @@ class User {
   }
 }
 
-module.exports = User;
+module.exports = User;*/
