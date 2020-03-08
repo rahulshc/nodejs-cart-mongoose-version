@@ -10,7 +10,7 @@ app.set('view engine', 'ejs');
 const adminRoutes=require('./routes/admin');//
 const shopRoutes = require('./routes/shop');
 const errorController=require('./controllers/error');
-//const User = require('./models/user');
+const User = require('./models/user');
 //between creating app and creatig server we can add middlewares
 
 
@@ -23,14 +23,14 @@ const errorController=require('./controllers/error');
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(express.static(path.join(__dirname, 'public')));//makes the public folder statically available to front end
 
-/*app.use((req, res, next) => {
-    User.findById('5e5e8bb61c9d44000012950f')
+app.use((req, res, next) => {
+    User.findById('5e6526098e5877236ddae237')
     .then(user=> {
-        req.user=new User(user.name, user.email, user.cart, user._id);
+        req.user=user;
         next();
     })
     .catch(err=> console.log(err));
-});*/
+});
 //can use multipe static folders
 //order of admin routes and shop routes matters here if we used app.use in admin and shop routes
 app.use('/admin',adminRoutes);//appendes all admin routes with/admin
@@ -61,6 +61,21 @@ server.listen(3000);*/
 });*/
 
 mongoose.connect(process.env.MONGODB_URI)
+.then(result=> {
+    User.findOne().then(user=> {
+        if(!user){
+            const user = new User({
+                name: 'Rahul',
+                email: 'test@test.com',
+                cart: {
+                    items: []
+                }
+            });
+            return user.save(); 
+        }
+    })
+    
+})
 .then(result=> {
     app.listen(3000);
 }).catch(err=> console.log(err));
