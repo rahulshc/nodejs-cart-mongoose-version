@@ -10,7 +10,7 @@ app.set('view engine', 'ejs');
 const adminRoutes=require('./routes/admin');//
 const shopRoutes = require('./routes/shop');
 const errorController=require('./controllers/error');
-const User = require('./models/user');
+//const User = require('./models/user');
 //between creating app and creatig server we can add middlewares
 
 
@@ -23,14 +23,14 @@ const User = require('./models/user');
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(express.static(path.join(__dirname, 'public')));//makes the public folder statically available to front end
 
-app.use((req, res, next) => {
+/*app.use((req, res, next) => {
     User.findById('5e5e8bb61c9d44000012950f')
     .then(user=> {
         req.user=new User(user.name, user.email, user.cart, user._id);
         next();
     })
     .catch(err=> console.log(err));
-});
+});*/
 //can use multipe static folders
 //order of admin routes and shop routes matters here if we used app.use in admin and shop routes
 app.use('/admin',adminRoutes);//appendes all admin routes with/admin
