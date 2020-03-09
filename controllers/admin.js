@@ -17,7 +17,8 @@ exports.postAddProduct = (req, res, next) => {
     title: title,
     imageUrl: imageUrl,
     price: price,
-    description: description
+    description: description,
+    userId: req.user._id//we can also just assign req.user and mongoose will just extract and assign id
   });
   product
     .save()
