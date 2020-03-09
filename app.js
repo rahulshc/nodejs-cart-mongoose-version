@@ -9,6 +9,7 @@ app.set('view engine', 'ejs');
 //const adminRoutes=require('./routes/admin');//works for module.exports
 const adminRoutes=require('./routes/admin');//
 const shopRoutes = require('./routes/shop');
+const authRoutes = require('./routes/auth');
 const errorController=require('./controllers/error');
 const User = require('./models/user');
 //between creating app and creatig server we can add middlewares
@@ -35,6 +36,7 @@ app.use((req, res, next) => {
 //order of admin routes and shop routes matters here if we used app.use in admin and shop routes
 app.use('/admin',adminRoutes);//appendes all admin routes with/admin
 app.use(shopRoutes);
+app.use(authRoutes);
 
 /*db.execute('select * from products')
 .then(result=>{
