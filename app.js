@@ -2,6 +2,7 @@
 const express=require('express');
 const bodyParser=require('body-parser');
 const mongoose=require('mongoose');
+const session = require('express-session');
 const path=require('path');
 const app = express();
 app.set('view engine', 'ejs');
@@ -23,7 +24,7 @@ const User = require('./models/user');
 //bodyparser.urlencoded internally calls the next
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(express.static(path.join(__dirname, 'public')));//makes the public folder statically available to front end
-
+//app.use(session({secret: 'my secret', resave: false, saveUninitialized}))
 app.use((req, res, next) => {
     User.findById('5e6526098e5877236ddae237')
     .then(user=> {
