@@ -9,6 +9,7 @@ const authRoutes = require('./routes/auth');
 const errorController=require('./controllers/error');
 const User = require('./models/user');
 const MongoDBStore=require('connect-mongodb-session')(session);
+const csrf=require('csurf');
 const app = express();
 
 const store = new MongoDBStore({
@@ -16,20 +17,16 @@ const store = new MongoDBStore({
     collection: 'sessions'
 });
 
+const csrfProtection = csrf();
+
 app.set('view engine', 'ejs');
 
 
 app.use(bodyParser.urlencoded({extended: false}));
 app.use(express.static(path.join(__dirname, 'public')));
 app.use(session({secret: 'my secret', resave: false, saveUninitialized: false, store: store}));//we can also set cookie here
-/*app.use((req, res, next) => {
-    User.findById('5e6526098e5877236ddae237')
-    .then(user=> {
-        req.user=user;
-        next();
-    })
-    .catch(err=> console.log(err));
-});*/
+app.use(csrfProtection);
+
 //can use multipe static folders
 //order of admin routes and shop routes matters here if we used app.use in admin and shop routes
 app.use((req,res,next)=> {
@@ -43,6 +40,12 @@ app.use((req,res,next)=> {
     })
     .catch(err=>console.log(err));
 });
+
+app.use((req,res,next)=> {
+    res.locals.isAuthenticated = req.session.isLoggedIn;
+    res.locals.csrfToken = req.csrfToken();
+    next();
+})
 app.use('/admin',adminRoutes);//appendes all admin routes with/admin
 app.use(shopRoutes);
 app.use(authRoutes);
