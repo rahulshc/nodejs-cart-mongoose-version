@@ -10,6 +10,7 @@ const errorController=require('./controllers/error');
 const User = require('./models/user');
 const MongoDBStore=require('connect-mongodb-session')(session);
 const csrf=require('csurf');
+const flash = require('connect-flash');
 const app = express();
 
 const store = new MongoDBStore({
@@ -18,7 +19,7 @@ const store = new MongoDBStore({
 });
 
 const csrfProtection = csrf();
-
+app.use(flash());
 app.set('view engine', 'ejs');
 
 
