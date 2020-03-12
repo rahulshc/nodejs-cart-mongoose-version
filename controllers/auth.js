@@ -7,7 +7,7 @@ const {validationResult} = require('express-validator/check');
 
 const transporter = nodemailer.createTransport(sendgridTransport({
   auth: {
-    api_key: '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'
+    api_key: process.env.SENDGRID_API_KEY
   }
 }));
 
@@ -85,7 +85,7 @@ exports.getSignup = (req, res, next) => {
 exports.postSignup = (req, res, next) => {
   const email=req.body.email;
   const password=req.body.password;
-  const confirmPassword=req.body.confirmPassword;
+  
   const errors=validationResult(req);
   if(!errors.isEmpty()){
     return res.status(422).render('auth/signup', {
