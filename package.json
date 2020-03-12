@@ -27,7 +27,9 @@
     "express": "^4.17.1",
     "express-session": "^1.17.0",
     "mongodb": "^3.5.4",
-    "mongoose": "^5.9.3"
+    "mongoose": "^5.9.3",
+    "nodemailer": "^6.4.5",
+    "nodemailer-sendgrid-transport": "^0.2.0"
   },
   "devDependencies": {
     "nodemon": "^2.0.2"
