@@ -1,18 +1,39 @@
 const Product = require('../models/product');
-
+const {validationResult}=require('express-validator');
 exports.getAddProduct = (req, res, next) => {
   res.render('admin/edit-product', {
     pageTitle: 'Add Product',
     path: '/admin/add-product',
-    editing: false
+    editing: false,
+    hasError: false,
+    errorMessage: null,
+    validationErrors: []
   });
 };
 
 exports.postAddProduct = (req, res, next) => {
   const title = req.body.title;
-  const imageUrl = req.body.imageUrl;
+  const imageURl = req.file;//req.body.image;
   const price = req.body.price;
   const description = req.body.description;
+  console.log(imageURl);
+  const errors= validationResult(req);
+  if(!errors.isEmpty()){
+    return res.status(422).render('admin/edit-product', {
+      pageTitle: 'Add Product',
+      path: '/admin/edit-product',
+      editing: false,
+      hasError: true,
+      product: {
+        title:title,
+        imageUrl: imageUrl,
+        price: price,
+        description: description
+      },
+      errorMessage: errors.array()[0].msg,
+      validationErrors: errors.Array()
+    });
+  }
   const product = new Product({
     title: title,
     imageUrl: imageUrl,
@@ -48,7 +69,10 @@ exports.getEditProduct = (req, res, next) => {
         pageTitle: 'Edit Product',
         path: '/admin/edit-product',
         editing: editMode,
-        product: product
+        product: product,
+        hasError: false,
+        errorMessage: null,
+        validationErrors: errors.Array()
       });
     })
     .catch(err => console.log(err));
@@ -60,7 +84,24 @@ exports.postEditProduct = (req, res, next) => {
   const updatedPrice = req.body.price;
   const updatedImageUrl = req.body.imageUrl;
   const updatedDesc = req.body.description;
-
+  const errors= validationResult(req);
+  if(!errors.isEmpty()){
+    return res.status(422).render('admin/edit-product', {
+      pageTitle: 'Edit Product',
+      path: '/admin/edit-product',
+      editing: true,
+      hasError: true,
+      product: {
+        title:updatedTitle,
+        imageUrl: updatedImageUrl,
+        price: updatedPrice,
+        description: updatedDesc,
+        _id: prodId
+      },
+      errorMessage: errors.array()[0].msg,
+      validationErrors: errors.Array()
+    });
+  }
   Product.findById(prodId)
   .then(product=> {
     if(product.userId.toString() !== req.user._id.toString()){
@@ -92,11 +133,18 @@ exports.getProducts = (req, res, next) => {
 };
 
 exports.postDeleteProduct = (req, res, next) => {
+  //throw new Error('dummy');//this will work and be caught by error handling middleware
   const prodId = req.body.productId;
   Product.deleteOne({_id: prodId, userId: req.user._id})
     .then(() => {
+      //throw new Error('dummy'); this will not work as it is in asynchronous block then or catch
       console.log('DESTROYED PRODUCT');
       res.redirect('/admin/products');
     })
-    .catch(err => console.log(err));
+    .catch(err => {
+      //inside the async block (then or catch) we shall to create error object and return with next
+      const error= new Error(err);
+      error.httpStatusCode = 500;
+      return next(error);
+    });
 };

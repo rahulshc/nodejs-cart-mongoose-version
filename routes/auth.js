@@ -4,7 +4,20 @@ const {check, body} = require('express-validator/check');
 const router = express.Router();
 const User = require('../models/user');
 router.get('/login', authController.getLogin);
-router.post('/login', authController.postLogin);
+router.post(
+    '/login',
+    [
+      body('email')
+        .isEmail()
+        .withMessage('Please enter a valid email address.').normalizeEmail(),
+      body('password', 'Password has to be valid.')
+        .isLength({ min: 5 })
+        .isAlphanumeric()
+        .trim()
+    ],
+    authController.postLogin
+  );
+  
 router.post('/logout', authController.postLogout);
 router.get('/signup', authController.getSignup);
 router.post('/signup', 
@@ -18,16 +31,16 @@ router.post('/signup',
     }
     return true;//custom validation succeeded*/
 
-    User.findOne({email: value}).then(userDoc=> {
+    return User.findOne({email: value}).then(userDoc=> {
         if(userDoc) {
           return Promise.reject('Email address already exists!');
         }
     });
-}),
-body('password', 'Default error message for all validators').isLength({min: 5}).isAlphanumeric(),
-body('confirmPassword').custom((value, { req}) => {
+}).normalizeEmail(),
+body('password', 'Default error message for all validators').isLength({min: 5}).isAlphanumeric().trim(),
+body('confirmPassword').trim().custom((value, { req}) => {
     if(value !== req.body.password){
-        throw new Error('passwords have to match!');
+        throw new Error('passwords have to match!');//express-validator catches this
     }
     return true;
 })//if we do not use withmessage then shall use default invalid value message
