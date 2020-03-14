@@ -25,19 +25,35 @@ const fileStorage= multer.diskStorage({
         cb(null, 'images');
     },
     filename: (req, file, cb) => {
-        cb(null, new Date().toISOString() + '-' + file.originalname);
+        cb(null, file.filename + '-' + file.originalname);
     }
 });
+
+const fileFilter = (req, file, cb) => {
+    if(file.mimetype=== 'image/png' || file.mimetype=== 'image/jpg' || file.mimetype=== 'image/jpeg')
+    {
+        cb(null, true);
+    }
+    else{
+        cb(null, false);
+    }
+}
 app.use(flash());
 app.set('view engine', 'ejs');
 
 
 app.use(bodyParser.urlencoded({extended: false}));
-app.use(multer({storage: fileStorage}).single('image'));//single for handling single file, image is the name of the identifier in front end
+app.use(multer({storage: fileStorage, fileFilter: fileFilter}).single('image'));//single for handling single file, image is the name of the identifier in front end
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.static(path.join(__dirname, 'images')));
 app.use(session({secret: 'my secret', resave: false, saveUninitialized: false, store: store}));//we can also set cookie here
 app.use(csrfProtection);
 
+app.use((req,res,next)=> {
+    res.locals.isAuthenticated = req.session.isLoggedIn;
+    res.locals.csrfToken = req.csrfToken();
+    next();
+});
 //can use multipe static folders
 //order of admin routes and shop routes matters here if we used app.use in admin and shop routes
 app.use((req,res,next)=> {
@@ -57,11 +73,7 @@ app.use((req,res,next)=> {
     });
 });
 
-app.use((req,res,next)=> {
-    res.locals.isAuthenticated = req.session.isLoggedIn;
-    res.locals.csrfToken = req.csrfToken();
-    next();
-})
+
 app.use('/admin',adminRoutes);//appendes all admin routes with/admin
 app.use(shopRoutes);
 app.use(authRoutes);
@@ -74,7 +86,11 @@ app.use(errorController.get404);
 
 //error handling middleware
 app.use((error, req, res, next) => {
-res.render('500');
+    res.status(500).render('500', {
+        pageTitle: 'Error!',
+        path: '/500',
+        isAuthenticated: req.session.isLoggedIn
+      });
 //or can also be like res.redirect('/500) however 
 //for api driven approach res.status(error.httpStatusCode).render() 
 });
